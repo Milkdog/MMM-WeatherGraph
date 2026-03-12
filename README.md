@@ -22,8 +22,6 @@ Features:
 
 ## Installation:
 
--Get an API key from OpenWeatherMap.org.  https://openweathermap.org/darksky-openweather
-
 -Open a terminal window on your device
 
 -Navigate to your MagicMirror's modules folder. If you are using the default installation directory, use the command:
@@ -34,9 +32,39 @@ cd ~/MagicMirror/modules
 
 git clone https://github.com/FlatPepsi17/MMM-WeatherGraph
 
+-Install dependencies:
+
+cd MMM-WeatherGraph && npm install
+
 -If you're using a MagicMirror, you need to lookup your GPS coordinates.  One way is to find your location is to open maps.google.com, and right-click on your location.  Use these coordinates in the config file to ensure you get weather for your location.
 
--This module uses white icons by default.  If you prefer color coded icons, merge the contents of the "Color-icons.md" file into the bottom of your "css\custom.css" file. 
+-This module uses white icons by default.  If you prefer color coded icons, merge the contents of the "Color-icons.md" file into the bottom of your "css\custom.css" file.
+
+## Weather Providers
+
+This module supports two weather data providers:
+
+### OpenWeatherMap (default)
+
+Get an API key from OpenWeatherMap.org: https://openweathermap.org/darksky-openweather
+
+You will need to sign up for the "One Call API 3.0" plan. Set the "Calls per day" setting there to 1000 so you never get billed.
+
+### Apple WeatherKit
+
+Apple WeatherKit requires an Apple Developer account ($99/year) with WeatherKit enabled. It includes 500,000 API calls/month.
+
+**Setup steps:**
+
+1. Sign in to your [Apple Developer account](https://developer.apple.com/account)
+2. Go to **Certificates, Identifiers & Profiles**
+3. Under **Keys**, create a new key with **WeatherKit** enabled. Download the `.p8` private key file and note the **Key ID**
+4. Under **Identifiers**, register a new **Services ID** (e.g., `com.yourname.weathergraph`). Enable **WeatherKit** for this identifier
+5. Note your **Team ID** (visible in the top right of the developer portal, or under Membership Details)
+6. Place the `.p8` key file somewhere accessible to MagicMirror (e.g., `/home/pi/MagicMirror/modules/MMM-WeatherGraph/AuthKey.p8`)
+7. Configure the module with `provider: "apple"` and your credentials (see config example below)
+
+**Note:** The next-hour minute-by-minute precipitation feature (`showNextHourPrecip`) is available with both providers but is most detailed with Apple WeatherKit. This data is only available in certain countries.
 
 Example screen shots:
 Rain is the filled blue graph, snow is the filled white graph. Note that the graph always has current conditions as the far left, and future forecasts as the graph continues to the right. Tick marks at the bottom show 6 hour steps in the future.
@@ -80,6 +108,27 @@ modules: [
 ]
 ````
 
+For Apple WeatherKit, use this minimal config:
+````javascript
+modules: [
+  {
+    module: 'MMM-WeatherGraph',
+    position: 'top_right',
+    config: {
+      provider: 'apple',
+      appleTeamId: 'YOUR_TEAM_ID',           // from Apple Developer portal
+      appleServiceId: 'com.you.weathergraph', // your registered Services ID
+      appleKeyId: 'YOUR_KEY_ID',             // from the key you created
+      appleKeyPath: '/home/pi/MagicMirror/modules/MMM-WeatherGraph/AuthKey.p8',
+      appleCountryCode: 'US',
+
+      latitude:   37.2431,
+      longitude: -115.7930
+    }
+  }
+]
+````
+
 If you want to customize the module, here's one with more options for easier use. Add it to this in the `config/config.js` file and change settings to your liking:
 ````javascript
 modules: [
@@ -107,7 +156,7 @@ modules: [
       graphWindColor: 'grey',        // on graph, color of temp line
       graphWindFont: '10px Arial',   // Default '10px Arial' set the pixel size and font. You can set it to '0px Arial' if you don't want numbers
       showGraphHumid: true,          // on graph, show humidity
-      humidWindColor: '#88CC88',     // on graph, color of humid line
+      graphHumidColor: '#88CC88',    // on graph, color of humid line
       graphHumidFont: '10px Arial',  // Default '10px Arial' set the pixel size and font. You can set it to '0px Arial' if you don't want numbers
       showGraphCloud: true,          // on graph, show cloud cover %
       graphCloudColor: '#dedb49',    // on graph, color of cloud line
@@ -116,6 +165,7 @@ modules: [
       showSummary: true,             // text of next hour's conditions
       showHotColdLines: true,        // blue line at freezing, red line at 80 F
       showGraphLegend: true,         // legend on bottom right of graph
+      showNextHourPrecip: true,      // next-hour minute-by-minute precipitation chart
 
       language: 'en', 
       units: 'imperial',             // or 'metric'
@@ -145,9 +195,44 @@ modules: [
   <thead>
   <tbody>
     <tr>
+      <td><code>provider</code></td>
+      <td>Which weather data provider to use.<br>
+        <br><b>Possible values:</b> <code>openweathermap</code>, <code>apple</code>
+        <br><b>Default value:</b> <code>openweathermap</code>
+      </td>
+    </tr>
+    <tr>
       <td><code>apiKey</code></td>
-      <td>The <a href="[https://openweathermap.org/price]" target="_blank">OpenWeatherMap API</a> key, which can be obtained by creating an API account.<br>
-        <br> This value is <b>REQUIRED</b>
+      <td>The <a href="https://openweathermap.org/price" target="_blank">OpenWeatherMap API</a> key. Required when provider is <code>openweathermap</code>.<br>
+        <br> This value is <b>REQUIRED</b> for OpenWeatherMap
+      </td>
+    </tr>
+    <tr>
+      <td><code>appleTeamId</code></td>
+      <td>Your Apple Developer Team ID. Required when provider is <code>apple</code>.</td>
+    </tr>
+    <tr>
+      <td><code>appleServiceId</code></td>
+      <td>Your registered Apple Services ID (e.g., <code>com.yourname.weathergraph</code>). Required when provider is <code>apple</code>.</td>
+    </tr>
+    <tr>
+      <td><code>appleKeyId</code></td>
+      <td>The Key ID from your Apple Developer WeatherKit key. Required when provider is <code>apple</code>.</td>
+    </tr>
+    <tr>
+      <td><code>appleKeyPath</code></td>
+      <td>Absolute path to the <code>.p8</code> private key file downloaded from Apple. Required when provider is <code>apple</code>.</td>
+    </tr>
+    <tr>
+      <td><code>appleCountryCode</code></td>
+      <td>ISO 3166-1 alpha-2 country code for your location.<br>
+        <br><b>Default value:</b> <code>US</code>
+      </td>
+    </tr>
+    <tr>
+      <td><code>timezone</code></td>
+      <td>IANA timezone string (e.g., <code>America/New_York</code>). Used by WeatherKit for accurate time calculations.<br>
+        <br><b>Default value:</b> <code>""</code> (auto-detected)
       </td>
     </tr>
     <tr>
@@ -169,14 +254,14 @@ modules: [
       <td>How often does the content needs to be fetched? (Milliseconds)<br>
         <br>The API enforces a 1,000/day request limit, so if you run your mirror constantly, anything below 90,000 (every 1.5 minutes) may require payment information or be blocked.<br>
         <br><b>Possible values:</b> <code>1000</code> - <code>86400000</code>
-        <br><b>Default value:</b> <code>300000</code> (5 minutes)
+        <br><b>Default value:</b> <code>900000</code> (15 minutes)
       </td>
     </tr>
     <tr>
       <td><code>animationSpeed</code></td>
       <td>Speed of the update animation. (Milliseconds)<br>
         <br><b>Possible values:</b><code>0</code> - <code>5000</code>
-        <br><b>Default value:</b> <code>2000</code> (2 seconds)
+        <br><b>Default value:</b> <code>1000</code> (1 second)
       </td>
     </tr>
     <tr>
@@ -208,13 +293,13 @@ modules: [
       </td>
     </tr>
     <tr>
-      <td><code>showForcast</code></td>
+      <td><code>showForecast</code></td>
       <td>Toggles display of the seven-day weather forecast list.<br>
         <br><b>Default value:</b>  <code>true</code>
       </td>
     </tr>
     <tr>
-      <td><code>showPrecipitationGraph</code></td>
+      <td><code>showGraph</code></td>
       <td>Toggles display of the precipitation graph.<br>
         <br><b>Default value:</b>  <code>true</code>
       </td>
@@ -278,6 +363,12 @@ modules: [
       <td>Set the pixel size and font name of the graph cloud coverage. You can set it to '0px Arial' if you want just a line.<br>
         <br><b>Default value:</b>  <code>10px Arial</code>
       </td>
-    </tr>    
+    </tr>
+    <tr>
+      <td><code>showNextHourPrecip</code></td>
+      <td>Toggles display of the next-hour minute-by-minute precipitation chart below the main graph. Auto-hidden when no minutely data is available.<br>
+        <br><b>Default value:</b>  <code>true</code>
+      </td>
+    </tr>
   </tbody>
 </table>

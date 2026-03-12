@@ -1,0 +1,9 @@
+{
+  "name": "mmm-weathergraph",
+  "version": "2.0.0",
+  "description": "MagicMirror weather graph module with OpenWeatherMap and Apple WeatherKit support",
+  "main": "MMM-WeatherGraph.js",
+  "dependencies": {
+    "jsonwebtoken": "^9.0.0"
+  }
+}

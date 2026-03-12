@@ -61,6 +61,11 @@
   margin-top: 1ex;
 }
 
+.MMM-WeatherGraph .next-hour-graph {
+  border: 1px solid #555;
+  margin-top: 2px;
+}
+
 .small.MMM-WeatherGraph .forecast {
   min-width: 200px;
   max-width: 300px;
@@ -71,5 +76,9 @@
 }
 
 .small.MMM-WeatherGraph .precipitation-graph {
+  width: 300px;
+}
+
+.small.MMM-WeatherGraph .next-hour-graph {
   width: 300px;
 }
